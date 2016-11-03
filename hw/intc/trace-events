@@ -44,6 +44,15 @@ lm32_pic_set_ip(uint32_t ip) "ip 0x%08x"
 lm32_pic_get_im(uint32_t im) "im 0x%08x"
 lm32_pic_get_ip(uint32_t ip) "ip 0x%08x"
 
+# hw/intc/lm32_pic.c
+litex_pic_raise_irq(void) "Raise CPU interrupt"
+litex_pic_lower_irq(void) "Lower CPU interrupt"
+litex_pic_interrupt(int irq, int level) "Set IRQ%d %d"
+litex_pic_set_im(uint32_t im) "im 0x%08x"
+litex_pic_set_ip(uint32_t ip) "ip 0x%08x"
+litex_pic_get_im(uint32_t im) "im 0x%08x"
+litex_pic_get_ip(uint32_t ip) "ip 0x%08x"
+
 # hw/intc/xics.c
 xics_icp_check_ipi(int server, uint8_t mfrr) "CPU %d can take IPI mfrr=%#x"
 xics_icp_accept(uint32_t old_xirr, uint32_t new_xirr) "icp_accept: XIRR %#"PRIx32"->%#"PRIx32

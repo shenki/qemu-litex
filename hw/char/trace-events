@@ -33,6 +33,11 @@ milkymist_uart_memory_write(uint32_t addr, uint32_t value) "addr %08x value %08x
 milkymist_uart_raise_irq(void) "Raise IRQ"
 milkymist_uart_lower_irq(void) "Lower IRQ"
 
+litex_uart_memory_read(uint32_t addr, uint32_t value) "addr %08x value %08x"
+litex_uart_memory_write(uint32_t addr, uint32_t value) "addr %08x value %08x"
+litex_uart_raise_irq(void) "Raise IRQ"
+litex_uart_lower_irq(void) "Lower IRQ"
+
 # hw/char/escc.c
 escc_put_queue(char channel, int b) "channel %c put: 0x%02x"
 escc_get_queue(char channel, int val) "channel %c get 0x%02x"

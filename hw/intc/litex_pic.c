@@ -24,45 +24,44 @@
 #include "monitor/monitor.h"
 #include "hw/sysbus.h"
 #include "trace.h"
-#include "hw/lm32/lm32_pic.h"
+#include "hw/lm32/litex_pic.h"
 #include "hw/intc/intc.h"
 
-#define TYPE_LM32_PIC "lm32-pic"
-#define LM32_PIC(obj) OBJECT_CHECK(LM32PicState, (obj), TYPE_LM32_PIC)
+#define TYPE_LITEX_PIC "litex-pic"
+#define LITEX_PIC(obj) OBJECT_CHECK(LITEXPicState, (obj), TYPE_LITEX_PIC)
 
-#define LM32_IRQ_TYPE_EDGE  1
-#define LM32_IRQ_TYPE_LEVEL 2
-
-struct LM32PicState {
+struct LITEXPicState {
     SysBusDevice parent_obj;
 
     qemu_irq parent_irq;
     uint32_t im;        /* interrupt mask */
     uint32_t ip;        /* interrupt pending */
     uint32_t irq_state;
+
     /* statistics */
     uint64_t stats_irq_count[32];
 };
-typedef struct LM32PicState LM32PicState;
+typedef struct LITEXPicState LITEXPicState;
 
-static void update_irq(LM32PicState *s)
+static void update_irq(LITEXPicState *s)
 {
+
     s->ip = s->irq_state;
     if (s->ip & s->im) {
-        trace_lm32_pic_raise_irq();
+        trace_litex_pic_raise_irq();
         qemu_irq_raise(s->parent_irq);
     } else {
-        trace_lm32_pic_lower_irq();
+        trace_litex_pic_lower_irq();
         qemu_irq_lower(s->parent_irq);
     }
 }
 
 static void irq_handler(void *opaque, int irq, int level)
 {
-    LM32PicState *s = opaque;
+    LITEXPicState *s = opaque;
 
     assert(irq < 32);
-    trace_lm32_pic_interrupt(irq, level);
+    trace_litex_pic_interrupt(irq, level);
 
     if (level) {
         s->irq_state |= (1 << irq);
@@ -74,21 +73,21 @@ static void irq_handler(void *opaque, int irq, int level)
     update_irq(s);
 }
 
-void lm32_pic_set_im(DeviceState *d, uint32_t im)
+void litex_pic_set_im(DeviceState *d, uint32_t im)
 {
-    LM32PicState *s = LM32_PIC(d);
+    LITEXPicState *s = LITEX_PIC(d);
 
-    trace_lm32_pic_set_im(im);
+    trace_litex_pic_set_im(im);
     s->im = im;
 
     update_irq(s);
 }
 
-void lm32_pic_set_ip(DeviceState *d, uint32_t ip)
+void litex_pic_set_ip(DeviceState *d, uint32_t ip)
 {
-    LM32PicState *s = LM32_PIC(d);
+    LITEXPicState *s = LITEX_PIC(d);
 
-    trace_lm32_pic_set_ip(ip);
+    trace_litex_pic_set_ip(ip);
 
     /* ack interrupt */
     s->ip &= ~ip;
@@ -96,25 +95,25 @@ void lm32_pic_set_ip(DeviceState *d, uint32_t ip)
     update_irq(s);
 }
 
-uint32_t lm32_pic_get_im(DeviceState *d)
+uint32_t litex_pic_get_im(DeviceState *d)
 {
-    LM32PicState *s = LM32_PIC(d);
+    LITEXPicState *s = LITEX_PIC(d);
 
-    trace_lm32_pic_get_im(s->im);
+    trace_litex_pic_get_im(s->im);
     return s->im;
 }
 
-uint32_t lm32_pic_get_ip(DeviceState *d)
+uint32_t litex_pic_get_ip(DeviceState *d)
 {
-    LM32PicState *s = LM32_PIC(d);
+    LITEXPicState *s = LITEX_PIC(d);
 
-    trace_lm32_pic_get_ip(s->ip);
+    trace_litex_pic_get_ip(s->ip);
     return s->ip;
 }
 
 static void pic_reset(DeviceState *d)
 {
-    LM32PicState *s = LM32_PIC(d);
+    LITEXPicState *s = LITEX_PIC(d);
     int i;
 
     s->im = 0;
@@ -125,71 +124,71 @@ static void pic_reset(DeviceState *d)
     }
 }
 
-static bool lm32_get_statistics(InterruptStatsProvider *obj,
+static bool litex_get_statistics(InterruptStatsProvider *obj,
                                 uint64_t **irq_counts, unsigned int *nb_irqs)
 {
-    LM32PicState *s = LM32_PIC(obj);
+    LITEXPicState *s = LITEX_PIC(obj);
     *irq_counts = s->stats_irq_count;
     *nb_irqs = ARRAY_SIZE(s->stats_irq_count);
     return true;
 }
 
-static void lm32_print_info(InterruptStatsProvider *obj, Monitor *mon)
+static void litex_print_info(InterruptStatsProvider *obj, Monitor *mon)
 {
-    LM32PicState *s = LM32_PIC(obj);
-    monitor_printf(mon, "lm32-pic: im=%08x ip=%08x irq_state=%08x\n",
+    LITEXPicState *s = LITEX_PIC(obj);
+    monitor_printf(mon, "litex-pic: im=%08x ip=%08x irq_state=%08x\n",
             s->im, s->ip, s->irq_state);
 }
 
-static void lm32_pic_init(Object *obj)
+static void litex_pic_init(Object *obj)
 {
     DeviceState *dev = DEVICE(obj);
-    LM32PicState *s = LM32_PIC(obj);
+    LITEXPicState *s = LITEX_PIC(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
     qdev_init_gpio_in(dev, irq_handler, 32);
     sysbus_init_irq(sbd, &s->parent_irq);
 }
 
-static const VMStateDescription vmstate_lm32_pic = {
-    .name = "lm32-pic",
+static const VMStateDescription vmstate_litex_pic = {
+    .name = "litex-pic",
     .version_id = 2,
     .minimum_version_id = 2,
     .fields = (VMStateField[]) {
-        VMSTATE_UINT32(im, LM32PicState),
-        VMSTATE_UINT32(ip, LM32PicState),
-        VMSTATE_UINT32(irq_state, LM32PicState),
-        VMSTATE_UINT64_ARRAY(stats_irq_count, LM32PicState, 32),
+        VMSTATE_UINT32(im, LITEXPicState),
+        VMSTATE_UINT32(ip, LITEXPicState),
+        VMSTATE_UINT32(irq_state, LITEXPicState),
+        VMSTATE_UINT64_ARRAY(stats_irq_count, LITEXPicState, 32),
         VMSTATE_END_OF_LIST()
     }
 };
 
-static void lm32_pic_class_init(ObjectClass *klass, void *data)
+static void litex_pic_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
     InterruptStatsProviderClass *ic = INTERRUPT_STATS_PROVIDER_CLASS(klass);
 
     dc->reset = pic_reset;
-    dc->vmsd = &vmstate_lm32_pic;
-    ic->get_statistics = lm32_get_statistics;
-    ic->print_info = lm32_print_info;
+    dc->vmsd = &vmstate_litex_pic;
+    ic->get_statistics = litex_get_statistics;
+    ic->print_info = litex_print_info;
 }
 
-static const TypeInfo lm32_pic_info = {
-    .name          = TYPE_LM32_PIC,
+static const TypeInfo litex_pic_info = {
+    .name          = TYPE_LITEX_PIC,
     .parent        = TYPE_SYS_BUS_DEVICE,
-    .instance_size = sizeof(LM32PicState),
-    .instance_init = lm32_pic_init,
-    .class_init    = lm32_pic_class_init,
+    .instance_size = sizeof(LITEXPicState),
+    .instance_init = litex_pic_init,
+    .class_init    = litex_pic_class_init,
     .interfaces = (InterfaceInfo[]) {
         { TYPE_INTERRUPT_STATS_PROVIDER },
         { }
     },
 };
 
-static void lm32_pic_register_types(void)
+static void litex_pic_register_types(void)
 {
-    type_register_static(&lm32_pic_info);
+    type_register_static(&litex_pic_info);
 }
 
-type_init(lm32_pic_register_types)
+type_init(litex_pic_register_types)
