@@ -2,6 +2,29 @@
 #define __GENERATED_CSR_H
 #include <hw/common.h>
 
+/* dna */
+#define CSR_DNA_BASE 0xe0006000
+#define CSR_DNA_ID_ADDR 0xe0006000
+#define CSR_DNA_ID_SIZE 8
+static inline unsigned long long int dna_id_read(void) {
+	unsigned long long int r = MMPTR(0xe0006000);
+	r <<= 8;
+	r |= MMPTR(0xe0006004);
+	r <<= 8;
+	r |= MMPTR(0xe0006008);
+	r <<= 8;
+	r |= MMPTR(0xe000600c);
+	r <<= 8;
+	r |= MMPTR(0xe0006010);
+	r <<= 8;
+	r |= MMPTR(0xe0006014);
+	r <<= 8;
+	r |= MMPTR(0xe0006018);
+	r <<= 8;
+	r |= MMPTR(0xe000601c);
+	return r;
+}
+
 /* sdram */
 #define CSR_SDRAM_BASE 0xe0004000
 #define CSR_SDRAM_DFII_CONTROL_ADDR 0xe0004000
@@ -71,6 +94,33 @@ static inline unsigned short int sdram_dfii_pi0_rddata_read(void) {
 	r <<= 8;
 	r |= MMPTR(0xe0004024);
 	return r;
+}
+
+/* spiflash */
+#define CSR_SPIFLASH_BASE 0xe0005000
+#define CSR_SPIFLASH_BITBANG_ADDR 0xe0005000
+#define CSR_SPIFLASH_BITBANG_SIZE 1
+static inline unsigned char spiflash_bitbang_read(void) {
+	unsigned char r = MMPTR(0xe0005000);
+	return r;
+}
+static inline void spiflash_bitbang_write(unsigned char value) {
+	MMPTR(0xe0005000) = value;
+}
+#define CSR_SPIFLASH_MISO_ADDR 0xe0005004
+#define CSR_SPIFLASH_MISO_SIZE 1
+static inline unsigned char spiflash_miso_read(void) {
+	unsigned char r = MMPTR(0xe0005004);
+	return r;
+}
+#define CSR_SPIFLASH_BITBANG_EN_ADDR 0xe0005008
+#define CSR_SPIFLASH_BITBANG_EN_SIZE 1
+static inline unsigned char spiflash_bitbang_en_read(void) {
+	unsigned char r = MMPTR(0xe0005008);
+	return r;
+}
+static inline void spiflash_bitbang_en_write(unsigned char value) {
+	MMPTR(0xe0005008) = value;
 }
 
 /* timer0 */
@@ -245,6 +295,8 @@ static inline void uart_phy_tuning_word_write(unsigned int value) {
 #define UART_INTERRUPT 0
 #define TIMER0_INTERRUPT 1
 #define SYSTEM_CLOCK_FREQUENCY 80000000
+#define SPIFLASH_PAGE_SIZE 256
+#define SPIFLASH_SECTOR_SIZE 65536
 #define L2_SIZE 8192
 
 #endif
